@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "StyliSH.Implementations/1.0.0": {
+        "dependencies": {
+          "StyliSH.Abstractions": "1.0.0"
+        },
+        "runtime": {
+          "StyliSH.Implementations.dll": {}
+        }
+      },
+      "StyliSH.Abstractions/1.0.0": {
+        "runtime": {
+          "StyliSH.Abstractions.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "StyliSH.Implementations/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "StyliSH.Abstractions/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

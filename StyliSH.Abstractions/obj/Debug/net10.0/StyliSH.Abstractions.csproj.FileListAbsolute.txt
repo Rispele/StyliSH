@@ -1,0 +1,11 @@
+E:\Education\Research\StyliSH\StyliSH.Abstractions\bin\Debug\net10.0\StyliSH.Abstractions.deps.json
+E:\Education\Research\StyliSH\StyliSH.Abstractions\bin\Debug\net10.0\StyliSH.Abstractions.dll
+E:\Education\Research\StyliSH\StyliSH.Abstractions\bin\Debug\net10.0\StyliSH.Abstractions.pdb
+E:\Education\Research\StyliSH\StyliSH.Abstractions\obj\Debug\net10.0\StyliSH.Abstractions.GeneratedMSBuildEditorConfig.editorconfig
+E:\Education\Research\StyliSH\StyliSH.Abstractions\obj\Debug\net10.0\StyliSH.Abstractions.AssemblyInfoInputs.cache
+E:\Education\Research\StyliSH\StyliSH.Abstractions\obj\Debug\net10.0\StyliSH.Abstractions.AssemblyInfo.cs
+E:\Education\Research\StyliSH\StyliSH.Abstractions\obj\Debug\net10.0\StyliSH.Abstractions.csproj.CoreCompileInputs.cache
+E:\Education\Research\StyliSH\StyliSH.Abstractions\obj\Debug\net10.0\StyliSH.Abstractions.dll
+E:\Education\Research\StyliSH\StyliSH.Abstractions\obj\Debug\net10.0\refint\StyliSH.Abstractions.dll
+E:\Education\Research\StyliSH\StyliSH.Abstractions\obj\Debug\net10.0\StyliSH.Abstractions.pdb
+E:\Education\Research\StyliSH\StyliSH.Abstractions\obj\Debug\net10.0\ref\StyliSH.Abstractions.dll
