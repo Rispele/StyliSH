@@ -3,42 +3,77 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 
 namespace StyliSH.Generators;
 
 [Generator]
 public sealed class MonadAliasGenerator : IIncrementalGenerator
 {
+    private static readonly DiagnosticDescriptor Styl001 = new(
+        id: "STYL001",
+        title: "MonadAlias requires partial",
+        messageFormat: "Struct '{0}' annotated with [MonadAlias] must be declared as partial",
+        category: "StyliSH.Generators",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    private static readonly DiagnosticDescriptor Styl002 = new(
+        id: "STYL002",
+        title: "MonadAlias requires exactly one type parameter",
+        messageFormat: "Struct '{0}' annotated with [MonadAlias] must have exactly one type parameter, but has {1}",
+        category: "StyliSH.Generators",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    private static readonly DiagnosticDescriptor Styl003 = new(
+        id: "STYL003",
+        title: "MonadAlias inner marker must implement IMonadMarker",
+        messageFormat: "Type '{0}' does not implement IMonadMarker<{0}>",
+        category: "StyliSH.Generators",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var provider = context.SyntaxProvider
+        var results = context.SyntaxProvider
             .ForAttributeWithMetadataName(
                 "StyliSH.Abstractions.Monads.Aliases.MonadAliasAttribute",
                 predicate: static (node, _) =>
                     node is RecordDeclarationSyntax rds &&
                     rds.ClassOrStructKeyword.IsKind(SyntaxKind.StructKeyword),
-                transform: static (ctx, ct) => ExtractModel(ctx, ct))
-            .Where(static m => m is not null);
+                transform: static (ctx, ct) => ExtractResult(ctx, ct))
+            .Where(static r => r is not null);
 
-        context.RegisterSourceOutput(provider, static (spc, model) => Generate(spc, model!));
+        context.RegisterSourceOutput(
+            results.Where(static r => r!.Model is not null).Select(static (r, _) => r!.Model!),
+            static (spc, model) => Generate(spc, model));
+
+        context.RegisterSourceOutput(
+            results.Where(static r => r!.Diagnostic is not null).Select(static (r, _) => r!.Diagnostic!),
+            static (spc, diag) => spc.ReportDiagnostic(diag.ToDiagnostic()));
     }
 
-    private static MonadAliasModel? ExtractModel(GeneratorAttributeSyntaxContext ctx, CancellationToken ct)
+    private static GenerationResult? ExtractResult(GeneratorAttributeSyntaxContext ctx, CancellationToken ct)
     {
         if (ctx.TargetSymbol is not INamedTypeSymbol structSymbol) return null;
 
         var syntaxNode = (RecordDeclarationSyntax)ctx.TargetNode;
+        var structName = structSymbol.Name;
 
-        // Validation: must be partial (TODO: report STYL001 diagnostic)
+        // STYL001: must be partial
         bool isPartial = false;
         foreach (var modifier in syntaxNode.Modifiers)
         {
             if (modifier.IsKind(SyntaxKind.PartialKeyword)) { isPartial = true; break; }
         }
-        if (!isPartial) return null;
+        if (!isPartial)
+            return new GenerationResult(null, DiagnosticData.From(Styl001, syntaxNode, structName, ""));
 
-        // Validation: exactly one type parameter (TODO: report STYL002 diagnostic)
-        if (structSymbol.TypeParameters.Length != 1) return null;
+        // STYL002: exactly one type parameter
+        if (structSymbol.TypeParameters.Length != 1)
+            return new GenerationResult(null, DiagnosticData.From(Styl002, syntaxNode, structName,
+                structSymbol.TypeParameters.Length.ToString()));
 
         // Extract inner marker type from attribute argument
         var attribute = ctx.Attributes[0];
@@ -46,23 +81,32 @@ public sealed class MonadAliasGenerator : IIncrementalGenerator
         var typeArg = attribute.ConstructorArguments[0];
         if (typeArg.Kind != TypedConstantKind.Type || typeArg.Value is not ITypeSymbol innerMarkerType) return null;
 
-        // TODO: report STYL003 if inner marker doesn't implement IMonadMarker<>
+        // STYL003: inner marker must implement IMonadMarker<TSelf>
+        var monadMarkerInterface = ctx.SemanticModel.Compilation
+            .GetTypeByMetadataName("StyliSH.Abstractions.Monads.IMonadMarker`1");
+        if (monadMarkerInterface is not null && !ImplementsMonadMarker(innerMarkerType, monadMarkerInterface))
+        {
+            var innerName = innerMarkerType.ToDisplayString();
+            return new GenerationResult(null, DiagnosticData.From(Styl003, syntaxNode, innerName, innerName));
+        }
 
         var namespaceName = structSymbol.ContainingNamespace?.ToDisplayString() ?? string.Empty;
-        var structName = structSymbol.Name;
         var typeParamName = structSymbol.TypeParameters[0].Name;
         var markerName = structName + "Marker";
         var accessibility = structSymbol.DeclaredAccessibility == Accessibility.Public ? "public" : "internal";
         var innerMarkerFullName = innerMarkerType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
-        return new MonadAliasModel(
-            namespaceName,
-            structName,
-            typeParamName,
-            innerMarkerFullName,
-            markerName,
-            accessibility
-        );
+        return new GenerationResult(
+            new MonadAliasModel(namespaceName, structName, typeParamName, innerMarkerFullName, markerName, accessibility),
+            null);
+    }
+
+    private static bool ImplementsMonadMarker(ITypeSymbol type, INamedTypeSymbol monadMarkerInterface)
+    {
+        foreach (var iface in type.AllInterfaces)
+            if (iface.OriginalDefinition.Equals(monadMarkerInterface, SymbolEqualityComparer.Default))
+                return true;
+        return false;
     }
 
     private static void Generate(SourceProductionContext spc, MonadAliasModel model)
@@ -132,3 +176,37 @@ internal sealed record MonadAliasModel(
     string InnerMarkerFullName,
     string MarkerName,
     string Accessibility);
+
+internal sealed record GenerationResult(MonadAliasModel? Model, DiagnosticData? Diagnostic);
+
+internal sealed record DiagnosticData(
+    DiagnosticDescriptor Descriptor,
+    string FilePath,
+    int StartLine,
+    int StartCharacter,
+    string Arg0,
+    string Arg1)
+{
+    public static DiagnosticData From(DiagnosticDescriptor descriptor, SyntaxNode node, string arg0, string arg1)
+    {
+        var span = node.GetLocation().GetLineSpan();
+        return new DiagnosticData(
+            descriptor,
+            span.Path,
+            span.StartLinePosition.Line,
+            span.StartLinePosition.Character,
+            arg0,
+            arg1);
+    }
+
+    public Diagnostic ToDiagnostic()
+    {
+        var location = Location.Create(
+            FilePath,
+            TextSpan.FromBounds(0, 0),
+            new LinePositionSpan(
+                new LinePosition(StartLine, StartCharacter),
+                new LinePosition(StartLine, StartCharacter)));
+        return Diagnostic.Create(Descriptor, location, Arg0, Arg1);
+    }
+}
