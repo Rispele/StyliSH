@@ -10,7 +10,7 @@ public readonly record struct EitherTMarker<TOuterMarker, TError>
 {
     public static IMonad<EitherTMarker<TOuterMarker, TError>, TValue> Pure<TValue>(TValue value)
     {
-        IMonad<EitherMarker<TError>, TValue> innerMonad = new Either<TError, TValue>(true, default, value);
+        IMonad<EitherMarker<TError>, TValue> innerMonad = Either<TError, TValue>.Success(value);
 
         return new EitherT<TOuterMarker, TError, TValue>(TOuterMarker.Pure(innerMonad));
     }

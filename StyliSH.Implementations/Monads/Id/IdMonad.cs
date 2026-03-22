@@ -25,9 +25,5 @@ public readonly record struct IdMonad<TValue>(TValue Value) :
     }
 
     public static implicit operator IdMonad<TValue>(MonadWrapper<IdMarker, TValue> monad)
-    {
-        return monad.Monad is IdMonad<TValue> idMonad
-            ? idMonad
-            : throw new InvalidCastException();
-    }
+        => IMonadUnwrapper<IdMonad<TValue>, IdMarker, TValue>.CastFrom(monad);
 }

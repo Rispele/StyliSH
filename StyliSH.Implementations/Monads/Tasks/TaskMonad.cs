@@ -33,9 +33,5 @@ public readonly record struct TaskMonad<TValue>(Task<TValue> Value) :
     }
 
     public static implicit operator TaskMonad<TValue>(MonadWrapper<TaskMarker, TValue> monad)
-    {
-        return monad.Monad is TaskMonad<TValue> taskMonad
-            ? taskMonad
-            : throw new InvalidCastException();
-    }
+        => IMonadUnwrapper<TaskMonad<TValue>, TaskMarker, TValue>.CastFrom(monad);
 }

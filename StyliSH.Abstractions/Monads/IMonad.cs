@@ -28,4 +28,9 @@ public interface IMonadUnwrapper<out TSelf, TMonadMarker, TValue>
     where TSelf : IMonadUnwrapper<TSelf, TMonadMarker, TValue>, IMonad<TMonadMarker, TValue>
 {
     public static abstract implicit operator TSelf(MonadWrapper<TMonadMarker, TValue> monad);
+
+    public static TSelf CastFrom(MonadWrapper<TMonadMarker, TValue> monad)
+        => monad.Monad is TSelf concrete
+            ? concrete
+            : throw new InvalidCastException($"Expected {typeof(TSelf).Name} but found {monad.Monad.GetType().Name}");
 }
