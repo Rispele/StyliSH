@@ -7,15 +7,15 @@ public readonly record struct Either<TError, TValue>
     : IMonad<EitherMarker<TError>, TValue>,
       IMonadUnwrapper<Either<TError, TValue>, EitherMarker<TError>, TValue>
 {
-    private readonly bool _isSuccess;
-    private readonly TError? _error;
-    private readonly TValue? _value;
+    private readonly bool isSuccess;
+    private readonly TError? error;
+    private readonly TValue? value;
 
     private Either(bool isSuccess, TError? error, TValue? value)
-    { _isSuccess = isSuccess; _error = error; _value = value; }
+    { this.isSuccess = isSuccess; this.error = error; this.value = value; }
 
     public TResult Match<TResult>(Func<TError, TResult> onError, Func<TValue, TResult> onSuccess)
-        => _isSuccess ? onSuccess(_value!) : onError(_error!);
+        => isSuccess ? onSuccess(value!) : onError(error!);
 
     public static MonadWrapper<EitherMarker<TError>, TValue> FromError(TError error)
         => new Either<TError, TValue>(false, error, default).Wrap();
