@@ -42,7 +42,7 @@ public class TaskMonadTests
     [Test]
     public async Task MonadWrapper_RoundTrip()
     {
-        MonadWrapper<TaskMarker, int> wrapper = TaskMarker.Pure(7).Wrap();
+        var wrapper = TaskMarker.Pure(7).Wrap();
         TaskMonad<int> concrete = wrapper;
         (await concrete.Value).Should().Be(7);
     }

@@ -16,22 +16,22 @@ public class EitherTTests
     {
         EitherT<IdMarker, string, int> ta = a;
         EitherT<IdMarker, string, int> tb = b;
-        IdMonad<Either<string, int>> ra = ta.Run<IdMonad<Either<string, int>>>();
-        IdMonad<Either<string, int>> rb = tb.Run<IdMonad<Either<string, int>>>();
+        var ra = ta.Run<IdMonad<Either<string, int>>>();
+        var rb = tb.Run<IdMonad<Either<string, int>>>();
         return ra == rb;
     }
 
     private static string RunId(MonadWrapper<EitherTMarker<IdMarker, string>, int> w)
     {
         EitherT<IdMarker, string, int> t = w;
-        IdMonad<Either<string, int>> r = t.Run<IdMonad<Either<string, int>>>();
+        var r = t.Run<IdMonad<Either<string, int>>>();
         return r.Value.Match(onError: e => $"err:{e}", onSuccess: v => $"ok:{v}");
     }
 
     private static async Task<string> RunTask(MonadWrapper<EitherTMarker<TaskMarker, string>, int> w)
     {
         EitherT<TaskMarker, string, int> t = w;
-        TaskMonad<Either<string, int>> r = t.Run<TaskMonad<Either<string, int>>>();
+        var r = t.Run<TaskMonad<Either<string, int>>>();
         var either = await r.Value;
         return either.Match(onError: e => $"err:{e}", onSuccess: v => $"ok:{v}");
     }

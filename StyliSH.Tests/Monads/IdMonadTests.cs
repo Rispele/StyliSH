@@ -31,7 +31,7 @@ public class IdMonadTests
     [Test]
     public void MonadWrapper_RoundTrip()
     {
-        MonadWrapper<IdMarker, int> wrapper = IdMarker.Pure(7).Wrap();
+        var wrapper = IdMarker.Pure(7).Wrap();
         IdMonad<int> concrete = wrapper;
         concrete.Value.Should().Be(7);
     }

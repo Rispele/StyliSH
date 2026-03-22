@@ -65,7 +65,7 @@ public class EitherTests
     [Test]
     public void EitherMarker_Match_DispatchesCorrectly()
     {
-        IMonad<EitherMarker<string>, int> right = EitherMarker<string>.Pure(5);
+        var right = EitherMarker<string>.Pure(5);
         var result = EitherMarker<string>.Match(right, onError: _ => -1, onSuccess: v => v);
         result.Should().Be(5);
     }
@@ -73,7 +73,7 @@ public class EitherTests
     [Test]
     public void MonadWrapper_RoundTrip()
     {
-        MonadWrapper<EitherMarker<string>, int> wrapper = Either<string, int>.FromValue(7);
+        var wrapper = Either<string, int>.FromValue(7);
         Either<string, int> concrete = wrapper;
         concrete.Match(onError: _ => 0, onSuccess: v => v).Should().Be(7);
     }
