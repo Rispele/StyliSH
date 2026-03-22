@@ -3,6 +3,8 @@
   <component name="UserContentModel">
     <attachedFolders>
       <Path>.claude</Path>
+      <Path>tasks</Path>
+      <Path>thoughts</Path>
     </attachedFolders>
     <explicitIncludes />
     <explicitExcludes />
