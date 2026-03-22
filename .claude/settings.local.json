@@ -6,7 +6,10 @@
       "mcp__rider__list_directory_tree",
       "Bash(dotnet build:*)",
       "Bash(dotnet test:*)",
-      "mcp__rider__get_run_configurations"
+      "mcp__rider__get_run_configurations",
+      "mcp__rider__get_file_text_by_path",
+      "Bash(ls:*)",
+      "mcp__rider__execute_terminal_command"
     ]
   }
 }

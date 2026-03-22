@@ -27,6 +27,9 @@
   <ItemGroup>
     <ProjectReference Include="..\StyliSH.Abstractions\StyliSH.Abstractions.csproj" />
     <ProjectReference Include="..\StyliSH.Implementations\StyliSH.Implementations.csproj" />
+    <ProjectReference Include="..\StyliSH.Generators\StyliSH.Generators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>
