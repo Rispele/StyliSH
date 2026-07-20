@@ -40,6 +40,16 @@ public class TaskMonadTests
     }
 
     [Test]
+    public async Task Bind_ChainsAsyncComputation_OutValues()
+    {
+        TaskMonad<int> m = TaskMarker.Pure(3)
+            .Bind(x => TaskMarker.Pure(x + 1), out var value1)
+            .Bind(x => TaskMarker.Pure(x + 1), out var value2)
+            .Bind(x => TaskMarker.Pure(value1.Value + value2.Value));
+        (await m.ActualValue).Should().Be(9);
+    }
+
+    [Test]
     public async Task MonadWrapper_RoundTrip()
     {
         var wrapper = TaskMarker.Pure(7).Wrap();
