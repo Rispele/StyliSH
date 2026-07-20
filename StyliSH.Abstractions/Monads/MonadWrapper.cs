@@ -8,18 +8,37 @@ public readonly record struct MonadWrapper<TMarker, TValue>(IMonad<TMarker, TVal
 {
     public MonadWrapper<TMarker, TNewValue> Map<TNewValue>(Func<TValue, TNewValue> map)
     {
-        return new MonadWrapper<TMarker, TNewValue>(Monad.RawMap(map));
+        return Monad.Map(map);
     }
 
     public MonadWrapper<TMarker, TNewValue> Bind<TNewValue>(Func<TValue, IMonad<TMarker, TNewValue>> bind)
     {
-        return new MonadWrapper<TMarker, TNewValue>(Monad.RawBind(bind));
+        return Monad.Bind(bind);
     }
-    
+
     public MonadWrapper<TMarker, TNewValue> Bind<TNewValue>(Func<TValue, MonadWrapper<TMarker, TNewValue>> bind)
     {
-        return Bind(BindInner);
+        return Monad.Bind(bind);
+    }
 
-        IMonad<TMarker, TNewValue> BindInner(TValue value) => bind(value).Monad;
+    public MonadWrapper<TMarker, TNewValue> Map<TNewValue>(
+        Func<TValue, TNewValue> map,
+        out IValueWrapper<TNewValue> newValue)
+    {
+        return Monad.Map(map, out newValue);
+    }
+
+    public MonadWrapper<TMarker, TNewValue> Bind<TNewValue>(
+        Func<TValue, IMonad<TMarker, TNewValue>> bind,
+        out IValueWrapper<TNewValue> newValue)
+    {
+        return Monad.Bind(bind, out newValue);
+    }
+
+    public MonadWrapper<TMarker, TNewValue> Bind<TNewValue>(
+        Func<TValue, MonadWrapper<TMarker, TNewValue>> bind,
+        out IValueWrapper<TNewValue> newValue)
+    {
+        return Monad.Bind(bind, out newValue);
     }
 }

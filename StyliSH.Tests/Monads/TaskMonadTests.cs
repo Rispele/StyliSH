@@ -9,8 +9,8 @@ public class TaskMonadTests
         MonadWrapper<TaskMarker, int> a,
         MonadWrapper<TaskMarker, int> b)
     {
-        var ta = ((TaskMonad<int>)a).Value;
-        var tb = ((TaskMonad<int>)b).Value;
+        var ta = ((TaskMonad<int>)a).ActualValue;
+        var tb = ((TaskMonad<int>)b).ActualValue;
         return await ta == await tb;
     }
 
@@ -21,14 +21,14 @@ public class TaskMonadTests
     public async Task Pure_CreatesCompletedTask()
     {
         TaskMonad<int> m = TaskMarker.Pure(42).Wrap();
-        (await m.Value).Should().Be(42);
+        (await m.ActualValue).Should().Be(42);
     }
 
     [Test]
     public async Task Map_TransformsAsyncResult()
     {
         TaskMonad<int> m = TaskMarker.Pure(5).Wrap().Map(x => x * 2);
-        (await m.Value).Should().Be(10);
+        (await m.ActualValue).Should().Be(10);
     }
 
     [Test]
@@ -36,7 +36,7 @@ public class TaskMonadTests
     {
         TaskMonad<int> m = TaskMarker.Pure(3).Wrap()
             .Bind(x => TaskMarker.Pure(x + 1).Wrap());
-        (await m.Value).Should().Be(4);
+        (await m.ActualValue).Should().Be(4);
     }
 
     [Test]
@@ -44,7 +44,7 @@ public class TaskMonadTests
     {
         var wrapper = TaskMarker.Pure(7).Wrap();
         TaskMonad<int> concrete = wrapper;
-        (await concrete.Value).Should().Be(7);
+        (await concrete.ActualValue).Should().Be(7);
     }
 
     [Test]

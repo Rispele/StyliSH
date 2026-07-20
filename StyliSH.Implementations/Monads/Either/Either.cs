@@ -5,14 +5,18 @@ namespace StyliSH.Implementations.Monads.Either;
 
 public readonly record struct Either<TError, TValue>
     : IMonad<EitherMarker<TError>, TValue>,
-      IMonadUnwrapper<Either<TError, TValue>, EitherMarker<TError>, TValue>
+        IMonadUnwrapper<Either<TError, TValue>, EitherMarker<TError>, TValue>
 {
     private readonly bool isSuccess;
     private readonly TError? error;
     private readonly TValue? value;
 
     private Either(bool isSuccess, TError? error, TValue? value)
-    { this.isSuccess = isSuccess; this.error = error; this.value = value; }
+    {
+        this.isSuccess = isSuccess;
+        this.error = error;
+        this.value = value;
+    }
 
     public TResult Match<TResult>(Func<TError, TResult> onError, Func<TValue, TResult> onSuccess)
         => isSuccess ? onSuccess(value!) : onError(error!);
@@ -24,6 +28,8 @@ public readonly record struct Either<TError, TValue>
         => new Either<TError, TValue>(true, default, value).Wrap();
 
     internal static Either<TError, TValue> Success(TValue value) => new(true, default, value);
+
+    public IValueWrapper<TValue> Value => new ValueWrapper<TValue>(value, isSuccess);
 
     public IMonad<EitherMarker<TError>, TNewValue> RawMap<TNewValue>(Func<TValue, TNewValue> map)
         => Match(

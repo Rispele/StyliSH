@@ -130,6 +130,8 @@ public sealed class MonadAliasGenerator : IIncrementalGenerator
         sb.AppendLine("{");
         sb.AppendLine($"    public required global::StyliSH.Abstractions.Monads.IMonad<{m.InnerMarkerFullName}, {m.TypeParameterName}> Inner {{ get; init; }}");
         sb.AppendLine();
+        sb.AppendLine($"    public global::StyliSH.Abstractions.Monads.IValueWrapper<{m.TypeParameterName}> Value => Inner.Value;");
+        sb.AppendLine();
         sb.AppendLine($"    public global::StyliSH.Abstractions.Monads.IMonad<{markerFullName}, TNewValue> RawMap<TNewValue>(");
         sb.AppendLine($"        global::System.Func<{m.TypeParameterName}, TNewValue> map)");
         sb.AppendLine($"        => new {m.StructName}<TNewValue> {{ Inner = Inner.RawMap(map) }};");

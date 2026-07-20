@@ -3,10 +3,12 @@ namespace StyliSH.Abstractions.Monads.Aliases;
 public readonly record struct MonadAlias<TAliasMarker, TInnerMarker, TValue>(
     IMonad<TInnerMarker, TValue> Inner)
     : IMonad<TAliasMarker, TValue>,
-      IMonadUnwrapper<MonadAlias<TAliasMarker, TInnerMarker, TValue>, TAliasMarker, TValue>
+        IMonadUnwrapper<MonadAlias<TAliasMarker, TInnerMarker, TValue>, TAliasMarker, TValue>
     where TAliasMarker : IMonadMarker<TAliasMarker>
     where TInnerMarker : IMonadMarker<TInnerMarker>
 {
+    public IValueWrapper<TValue> Value => Inner.Value;
+
     public IMonad<TAliasMarker, TNewValue> RawMap<TNewValue>(Func<TValue, TNewValue> map)
         => new MonadAlias<TAliasMarker, TInnerMarker, TNewValue>(Inner.RawMap(map));
 

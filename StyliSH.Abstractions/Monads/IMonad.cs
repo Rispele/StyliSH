@@ -6,10 +6,15 @@
 public interface IMonad<TMonadMarker, out TValue>
     where TMonadMarker : IMonadMarker<TMonadMarker>
 {
-    public MonadWrapper<TMonadMarker, TNewValue> Map<TNewValue>(Func<TValue, TNewValue> map) => RawMap(map).Wrap();
-    public MonadWrapper<TMonadMarker, TNewValue> Bind<TNewValue>(Func<TValue, IMonad<TMonadMarker, TNewValue>> bind) => RawBind(bind).Wrap();
+    public IValueWrapper<TValue> Value { get; }
 
-    public MonadWrapper<TMonadMarker, TNewValue> Bind<TNewValue>(Func<TValue, MonadWrapper<TMonadMarker, TNewValue>> bind)
+    public MonadWrapper<TMonadMarker, TNewValue> Map<TNewValue>(Func<TValue, TNewValue> map) => RawMap(map).Wrap();
+
+    public MonadWrapper<TMonadMarker, TNewValue> Bind<TNewValue>(Func<TValue, IMonad<TMonadMarker, TNewValue>> bind) =>
+        RawBind(bind).Wrap();
+
+    public MonadWrapper<TMonadMarker, TNewValue> Bind<TNewValue>(
+        Func<TValue, MonadWrapper<TMonadMarker, TNewValue>> bind)
     {
         return Bind(BindInner);
 

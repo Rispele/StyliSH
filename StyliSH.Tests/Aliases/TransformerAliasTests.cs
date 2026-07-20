@@ -36,7 +36,7 @@ public class TransformerAliasTests
     }
 
     private static string Inspect(MonadWrapper<DomainResultTMarker, int> w)
-        => Run(w).Value.Match(onError: e => $"err:{e}", onSuccess: v => $"ok:{v}");
+        => Run(w).ActualValue.Match(onError: e => $"err:{e}", onSuccess: v => $"ok:{v}");
 
     private static bool DomainResultTEq(
         MonadWrapper<DomainResultTMarker, int> a,
@@ -104,7 +104,7 @@ public class TransformerAliasTests
         var w = DomainResultTMarker.FromValue(42);
         var result = Run(w);
         result.Should().BeOfType<IdMonad<Either<string, int>>>();
-        result.Value.Match(onError: _ => false, onSuccess: v => v == 42).Should().BeTrue();
+        result.ActualValue.Match(onError: _ => false, onSuccess: v => v == 42).Should().BeTrue();
     }
 
     // ── Type isolation ─────────────────────────────────────────────────────────

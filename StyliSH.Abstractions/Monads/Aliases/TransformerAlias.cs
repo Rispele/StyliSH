@@ -11,6 +11,8 @@ public readonly record struct TransformerAlias<TAliasMarker, TInnerTransformerMa
     where TInnerTransformerMarker : ITransformerMarker<TInnerTransformerMarker, TOuterMarker>
     where TOuterMarker : IMonadMarker<TOuterMarker>
 {
+    public IValueWrapper<TValue> Value => Inner.Value;
+
     public IMonad<TAliasMarker, TNewValue> RawMap<TNewValue>(Func<TValue, TNewValue> map)
         => new TransformerAlias<TAliasMarker, TInnerTransformerMarker, TOuterMarker, TInnerMonad, TNewValue>(
             Inner.RawMap(map));

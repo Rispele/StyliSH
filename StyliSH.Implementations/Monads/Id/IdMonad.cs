@@ -10,18 +10,20 @@ public readonly record struct IdMarker : IMonadMarker<IdMarker>
     }
 }
 
-public readonly record struct IdMonad<TValue>(TValue Value) :
+public readonly record struct IdMonad<TValue>(TValue ActualValue) :
     IMonad<IdMarker, TValue>,
     IMonadUnwrapper<IdMonad<TValue>, IdMarker, TValue>
 {
+    public IValueWrapper<TValue> Value => new ValueWrapper<TValue>(ActualValue, isInitialized: true);
+
     public IMonad<IdMarker, TNewValue> RawMap<TNewValue>(Func<TValue, TNewValue> map)
     {
-        return IdMarker.Pure(map(Value));
+        return IdMarker.Pure(map(ActualValue));
     }
 
     public IMonad<IdMarker, TNewValue> RawBind<TNewValue>(Func<TValue, IMonad<IdMarker, TNewValue>> bind)
     {
-        return bind(Value);
+        return bind(ActualValue);
     }
 
     public static implicit operator IdMonad<TValue>(MonadWrapper<IdMarker, TValue> monad)

@@ -11,21 +11,21 @@ public class IdMonadTests
     public void Pure_WrapsValue()
     {
         IdMonad<int> m = IdMarker.Pure(42).Wrap();
-        m.Value.Should().Be(42);
+        m.ActualValue.Should().Be(42);
     }
 
     [Test]
     public void Map_TransformsValue()
     {
         IdMonad<int> m = IdMarker.Pure(5).Wrap().Map(x => x * 2);
-        m.Value.Should().Be(10);
+        m.ActualValue.Should().Be(10);
     }
 
     [Test]
     public void Bind_ChainsComputation()
     {
         IdMonad<int> m = IdMarker.Pure(3).Wrap().Bind(x => IdMarker.Pure(x + 1).Wrap());
-        m.Value.Should().Be(4);
+        m.ActualValue.Should().Be(4);
     }
 
     [Test]
@@ -33,7 +33,7 @@ public class IdMonadTests
     {
         var wrapper = IdMarker.Pure(7).Wrap();
         IdMonad<int> concrete = wrapper;
-        concrete.Value.Should().Be(7);
+        concrete.ActualValue.Should().Be(7);
     }
 
     [Test]

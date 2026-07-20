@@ -25,14 +25,14 @@ public class EitherTTests
     {
         EitherT<IdMarker, string, int> t = w;
         var r = t.Run<IdMonad<Either<string, int>>>();
-        return r.Value.Match(onError: e => $"err:{e}", onSuccess: v => $"ok:{v}");
+        return r.ActualValue.Match(onError: e => $"err:{e}", onSuccess: v => $"ok:{v}");
     }
 
     private static async Task<string> RunTask(MonadWrapper<EitherTMarker<TaskMarker, string>, int> w)
     {
         EitherT<TaskMarker, string, int> t = w;
         var r = t.Run<TaskMonad<Either<string, int>>>();
-        var either = await r.Value;
+        var either = await r.ActualValue;
         return either.Match(onError: e => $"err:{e}", onSuccess: v => $"ok:{v}");
     }
 
