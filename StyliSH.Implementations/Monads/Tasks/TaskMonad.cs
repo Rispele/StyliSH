@@ -14,7 +14,7 @@ public readonly record struct TaskMonad<TValue>(Task<TValue> ActualValue) :
     IMonad<TaskMarker, TValue>,
     IMonadUnwrapper<TaskMonad<TValue>, TaskMarker, TValue>
 {
-    public IValueWrapper<TValue> Value => new ValueWrapper<TValue>(ActualValue.Result, isInitialized: true);
+    public IValueWrapper<TValue> Value => new AsyncValueWrapper<TValue>(ActualValue, isInitialized: true);
 
     public IMonad<TaskMarker, TNewValue> RawMap<TNewValue>(Func<TValue, TNewValue> map)
     {
