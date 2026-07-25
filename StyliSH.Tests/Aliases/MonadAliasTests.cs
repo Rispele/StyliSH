@@ -92,6 +92,16 @@ public class MonadAliasTests
         Inspect(w).Should().Be("err:e");
     }
 
+    [Test]
+    public void Map_WithOutValue_OnError_ForwardsUninitializedValue()
+    {
+        var w = DomainResultMarker.FromError<int>("e")
+            .Map(x => x * 2, out var value);
+
+        Inspect(w).Should().Be("err:e");
+        Assert.Throws<InvalidOperationException>(() => _ = value.Value);
+    }
+
     // ── Type isolation ─────────────────────────────────────────────────────────
 
     [Test]

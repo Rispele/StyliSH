@@ -47,6 +47,42 @@ public class TaskMonadTests
             .Bind(x => TaskMarker.Pure(x + 1), out var value2)
             .Bind(x => TaskMarker.Pure(value1.Value + value2.Value));
         (await m.ActualValue).Should().Be(9);
+        value1.Value.Should().Be(4);
+        value2.Value.Should().Be(5);
+    }
+
+    [Test]
+    public async Task Map_WithOutValue_DoesNotWaitForSourceAndCapturesEventualValue()
+    {
+        var source = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+        IMonad<TaskMarker, int> monad = new TaskMonad<int>(source.Task);
+        var mapStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var mapCall = Task.Run(() =>
+        {
+            mapStarted.SetResult();
+            var mapped = monad.Map(x => x * 2, out var value);
+            return (Mapped: mapped, Value: value);
+        });
+
+        bool completedBeforeSource;
+        try
+        {
+            await mapStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            completedBeforeSource =
+                await Task.WhenAny(mapCall, Task.Delay(TimeSpan.FromSeconds(2))) == mapCall;
+        }
+        finally
+        {
+            source.TrySetResult(21);
+        }
+
+        var result = await mapCall.WaitAsync(TimeSpan.FromSeconds(5));
+        TaskMonad<int> mappedMonad = result.Mapped;
+
+        completedBeforeSource.Should().BeTrue();
+        (await mappedMonad.ActualValue).Should().Be(42);
+        result.Value.Value.Should().Be(42);
     }
 
     [Test]

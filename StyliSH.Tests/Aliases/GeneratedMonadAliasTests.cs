@@ -49,6 +49,16 @@ public class GeneratedMonadAliasTests
         Inspect(w).Should().Be("ok:13");
     }
 
+    [Test]
+    public void Map_WithOutValue_UsesGeneratedValueForwarder()
+    {
+        var w = GenDomainResultMarker.Pure(5).Wrap()
+            .Map(x => x * 2, out var value);
+
+        Inspect(w).Should().Be("ok:10");
+        value.Value.Should().Be(10);
+    }
+
     // ── Type isolation ─────────────────────────────────────────────────────────
 
     [Test]

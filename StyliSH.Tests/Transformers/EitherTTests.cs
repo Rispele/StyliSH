@@ -83,6 +83,24 @@ public class EitherTTests
     }
 
     [Test]
+    public void Value_WithId_OnSuccess_ExposesValue()
+    {
+        EitherT<IdMarker, string, int> transformer = EitherT<IdMarker, string, int>.FromValue(42);
+
+        transformer.Value.Value.Should().Be(42);
+    }
+
+    [Test]
+    public void Value_WithId_OnError_Throws()
+    {
+        EitherT<IdMarker, string, int> transformer = EitherT<IdMarker, string, int>.FromError("fail");
+
+        var exception = Assert.Throws<InvalidOperationException>(() => _ = transformer.Value.Value);
+
+        exception!.Message.Should().Be("Value is not initialized.");
+    }
+
+    [Test]
     public void LeftIdentity_WithId()
     {
         MonadLawTests<EitherTMarker<IdMarker, string>, int>.VerifyLeftIdentity(
@@ -138,5 +156,40 @@ public class EitherTTests
         var w = EitherT<TaskMarker, string, int>.FromValue(3)
             .Bind(x => EitherT<TaskMarker, string, int>.FromValue(x + 10));
         (await RunTask(w)).Should().Be("ok:13");
+    }
+
+    [Test]
+    public async Task Map_WithOutValue_WithTask_DoesNotWaitForOuterTask()
+    {
+        var source = new TaskCompletionSource<IMonad<EitherMarker<string>, int>>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        IMonad<EitherTMarker<TaskMarker, string>, int> transformer = new EitherT<TaskMarker, string, int>(
+            new TaskMonad<IMonad<EitherMarker<string>, int>>(source.Task));
+        var mapStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var mapCall = Task.Run(() =>
+        {
+            mapStarted.SetResult();
+            var mapped = transformer.Map(x => x * 2, out var value);
+            return (Mapped: mapped, Value: value);
+        });
+
+        bool completedBeforeSource;
+        try
+        {
+            await mapStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            completedBeforeSource =
+                await Task.WhenAny(mapCall, Task.Delay(TimeSpan.FromSeconds(2))) == mapCall;
+        }
+        finally
+        {
+            source.TrySetResult(Either<string, int>.FromValue(21).Monad);
+        }
+
+        var result = await mapCall.WaitAsync(TimeSpan.FromSeconds(5));
+
+        completedBeforeSource.Should().BeTrue();
+        (await RunTask(result.Mapped)).Should().Be("ok:42");
+        result.Value.Value.Should().Be(42);
     }
 }

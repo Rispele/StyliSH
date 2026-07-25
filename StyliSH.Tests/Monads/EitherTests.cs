@@ -63,6 +63,43 @@ public class EitherTests
     }
 
     [Test]
+    public void Value_OnRight_ExposesValue()
+    {
+        Either<string, int> either = Either<string, int>.FromValue(42);
+
+        either.Value.Value.Should().Be(42);
+    }
+
+    [Test]
+    public void Value_OnLeft_Throws()
+    {
+        Either<string, int> either = Either<string, int>.FromError("fail");
+
+        var exception = Assert.Throws<InvalidOperationException>(() => _ = either.Value.Value);
+
+        exception!.Message.Should().Be("Value is not initialized.");
+    }
+
+    [Test]
+    public void Map_WithOutValue_OnLeft_PreservesErrorAndLeavesValueUninitialized()
+    {
+        var mapCalled = false;
+
+        Either<string, int> result = Either<string, int>.FromError("fail")
+            .Map(
+                x =>
+                {
+                    mapCalled = true;
+                    return x * 2;
+                },
+                out var value);
+
+        mapCalled.Should().BeFalse();
+        result.Match(onError: e => e, onSuccess: _ => "ok").Should().Be("fail");
+        Assert.Throws<InvalidOperationException>(() => _ = value.Value);
+    }
+
+    [Test]
     public void EitherMarker_Match_DispatchesCorrectly()
     {
         var right = EitherMarker<string>.Pure(5);

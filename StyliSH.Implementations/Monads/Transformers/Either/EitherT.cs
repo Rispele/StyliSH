@@ -24,7 +24,14 @@ public readonly record struct EitherT<TOuterMarker, TError, TValue>(
         return new EitherT<TOuterMarker, TError, TValue>(monad).Wrap();
     }
 
-    public IValueWrapper<TValue> Value => OuterMonad.Value.Value.Value;
+    public IValueWrapper<TValue> Value => new EitherTValueWrapper(OuterMonad.Value);
+
+    private readonly struct EitherTValueWrapper(
+        IValueWrapper<IMonad<EitherMarker<TError>, TValue>> outerValue)
+        : IValueWrapper<TValue>
+    {
+        public TValue Value => outerValue.Value.Value.Value;
+    }
 
     public IMonad<EitherTMarker<TOuterMarker, TError>, TNewValue> RawMap<TNewValue>(Func<TValue, TNewValue> map)
     {

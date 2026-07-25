@@ -29,7 +29,7 @@ public readonly record struct Either<TError, TValue>
 
     internal static Either<TError, TValue> Success(TValue value) => new(true, default, value);
 
-    public IValueWrapper<TValue> Value => new ValueWrapper<TValue>(value, isSuccess);
+    public IValueWrapper<TValue> Value => new ValueWrapper<TValue>(value!, isSuccess);
 
     public IMonad<EitherMarker<TError>, TNewValue> RawMap<TNewValue>(Func<TValue, TNewValue> map)
         => Match(

@@ -96,6 +96,26 @@ public class TransformerAliasTests
         Inspect(w).Should().Be("err:bad");
     }
 
+    [Test]
+    public void Map_WithOutValue_ForwardsTransformerValue()
+    {
+        var w = DomainResultTMarker.FromValue(5)
+            .Map(x => x * 2, out var value);
+
+        Inspect(w).Should().Be("ok:10");
+        value.Value.Should().Be(10);
+    }
+
+    [Test]
+    public void Map_WithOutValue_OnError_ForwardsUninitializedValue()
+    {
+        var w = DomainResultTMarker.FromError<int>("bad")
+            .Map(x => x * 2, out var value);
+
+        Inspect(w).Should().Be("err:bad");
+        Assert.Throws<InvalidOperationException>(() => _ = value.Value);
+    }
+
     // ── Run ────────────────────────────────────────────────────────────────────
 
     [Test]
